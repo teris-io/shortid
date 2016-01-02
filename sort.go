@@ -3,7 +3,7 @@
 //
 // Adapted from: http://stackoverflow.com/questions/22688651
 
-package runes
+package shortid
 
 import syssort "sort"
 
@@ -21,11 +21,11 @@ func (s sortrunes) Len() int {
 	return len(s)
 }
 
-func Sort(rs []rune) {
+func SortRunes(rs []rune) {
 	syssort.Sort(sortrunes(rs))
 }
 
-func Unique(rs []rune) []rune {
+func UniqueRunes(rs []rune) []rune {
 	var res []rune
 	found := make(map[rune]struct{})
 	for _, r := range rs {

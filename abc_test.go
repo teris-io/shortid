@@ -6,7 +6,6 @@ package shortid_test
 
 import (
 	"github.com/ventu-io/go-shortid"
-	"github.com/ventu-io/go-shortid/runes"
 	"math/rand"
 	"testing"
 )
@@ -28,7 +27,7 @@ func TestAbc_onSchuffle_seedDependentAndReproducible(t *testing.T) {
 func TestAbc_onShuffle_runeSliceOfSameLengthAsABC_andUnique(t *testing.T) {
 	seed := rand.Int63n(1024)
 	abc := shortid.MustNewAbcFor(nil, seed)
-	if len(runes.Unique(abc.Shuffled())) != len(shortid.ALPHABET) {
+	if len(shortid.UniqueRunes(abc.Shuffled())) != len(shortid.ALPHABET) {
 		t.Error("incorrect length or not unique")
 	}
 }

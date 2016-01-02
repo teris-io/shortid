@@ -4,9 +4,9 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
-	"github.com/ventu-io/go-shortid/runes"
 	"math"
 	"time"
+	"strings"
 )
 
 const ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-"
@@ -38,11 +38,11 @@ func NewAbcFor(rs []rune, seed int64) (*Abc, error) {
 	if rs == nil {
 		alphabet = []rune(ALPHABET)
 	} else {
-		alphabet = runes.Unique(rs)
+		alphabet = UniqueRunes(rs)
 		if len(alphabet) != len(ALPHABET) {
 			return nil, errors.New(fmt.Sprintf("custom alphabet for shortid must be %v unique characters, found %v unique ones", len(ALPHABET), len(alphabet)))
 		}
-		runes.Sort(alphabet)
+		SortRunes(alphabet)
 	}
 	return &Abc{alphabet: alphabet, startseed: seed, seed: seed}, nil
 }
@@ -88,25 +88,16 @@ func (abc *Abc) SetSeed(seed int64) {
 	abc.seed = seed
 }
 
-func (abc *Abc) Decode(id string) (int8, int8) {
+func (abc *Abc) Decode(id string) (uint8, uint8) {
+	shuf := string(abc.Shuffled())
 	rs := []rune(id)
-	var vers int8 = -1
-	var worker int8 = -1
-	for i, r := range abc.Shuffled() {
-		if vers >= 0 && worker >= 0 {
-			break
-		}
-		if rs[0] == r {
-			vers = int8(i) & 0x0f
-		}
-		if rs[1] == r {
-			worker = int8(i) & 0x0f
-		}
-	}
-	return vers, worker
+	i1 :=strings.IndexRune(shuf, rs[0])
+	i2 :=strings.IndexRune(shuf, rs[1])
+
+	return uint8(i1) &0x0f, uint8(i2)&0x0f
 }
 
-func (abc *Abc) Encode(n uint) (string, error) {
+func (abc *Abc) Encode(n uint) ([]rune, error) {
 	buf := make([]byte, 1)
 	var rs []rune
 
@@ -115,27 +106,36 @@ func (abc *Abc) Encode(n uint) (string, error) {
 	for i := 0; ; i++ {
 		_, err := rand.Read(buf)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
-		r, err := abc.Lookup(int((n>>uint(4*i))&0x0f) | int(buf[0]&0x30))
+		// str = str + lookup( ( (number >> (4 * loopCounter)) & 0x0f ) | randomByte() );
+		p1 := uint8(n>>uint(4*i))&0x0f
+		p2 := uint8(buf[0])&0x30
+		p3 := int(p1 | p2)
+		p4 := uint(p3)
+		if n == 5 {
+			log.Debug("crypto random %v: %v | %v -> %v (%v)", n, p1, p2, p3, p4)
+		}
+		r, err := abc.Lookup(p3)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 		rs = append(rs, r)
 		if (maxi < i) {
 			break
 		}
 	}
-	return string(rs), nil
+	return rs, nil
 }
 
-const version  = 5
 const worker = 0
 
 var start time.Time
+var version uint
 
 func init() {
 	start = time.Date(time.Now().Year()-1, time.November, 1, 1, 1, 1, 1, time.Local)
+	version = uint(time.Now().Year() - 2016)
 }
 
 var lastSec uint = 0
@@ -153,33 +153,36 @@ func (abc *Abc) Generate() (string, error) {
 		lastSec = sec;
 	}
 
-	var str, err = abc.Encode(version)
-	if err != nil {
-		return "", err
-	}
-	res := str
+	log.Debug("counter %v", counter)
+	var res []rune
 
-	str, err = abc.Encode(worker)
+	var rs, err = abc.Encode(version)
 	if err != nil {
 		return "", err
 	}
-	res += str
+	res = append(res, rs...)
+
+	rs, err = abc.Encode(worker)
+	if err != nil {
+		return "", err
+	}
+	res = append(res, rs...)
 
 	if (counter > 0) {
-		str, err = abc.Encode(counter)
+		rs, err = abc.Encode(counter)
 		if err != nil {
 			return "", err
 		}
-		res += str
+		res = append(res, rs...)
 	}
-	str, err = abc.Encode(sec)
+	rs, err = abc.Encode(sec)
 	if err != nil {
 		return "", err
 	}
-	res += str
+	res = append(res, rs...)
 
 
-	return str, nil
+	return string(res), nil
 }
 
 // Based on The Central Randomizer 1.3 (C) 1997 by Paul Houle (houle@msc.cornell.edu)
