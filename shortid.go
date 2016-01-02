@@ -23,55 +23,57 @@ type (
 	}
 
 	Shortid struct {
-		mx     sync.Mutex
-		abc    *Abc
-		worker uint
-		sec    uint
-		count  uint
+		mx      sync.Mutex
+		abc     *Abc
+		worker  uint
+		version uint      // restarts every year, rotates every 16 years!
+		epoch   time.Time // restarts every year
+		ts      uint      // timestamp (arbitrary units) incrementing since startts
+		count   uint      // request count within ts
 	}
 )
 
 const DEFAULT_ABC = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-"
 
-var (
-	version  uint      // restarts every 16 years
-	secstart time.Time // restarts every year
-)
-
-func init() {
-	now := time.Now()
-	secstart = time.Date(now.Year()-1, time.December, 1, 1, 1, 1, 1, time.Local)
-	version = uint(now.Year() % 16)
-}
-
 func New(worker uint8, alphabet string, seed uint64) (*Shortid, error) {
 	if abc, err := NewAbc(alphabet, seed); err == nil {
-		return &Shortid{abc: abc, worker: uint(worker), sec: 0, count: 0}, nil
+		now := time.Now()
+		return &Shortid{
+			abc:     abc,
+			worker:  uint(worker),
+			ts:      0,
+			count:   0,
+			epoch:   time.Date(now.Year()-1, time.December, 1, 1, 1, 1, 1, time.Local),
+			version: uint(now.Year() % 16),
+		}, nil
 	} else {
 		return nil, err
 	}
 }
 
 func (sid *Shortid) Generate() string {
-	sec := uint(time.Now().Sub(secstart).Seconds() * 1e-3)
+	return sid.generate(time.Now(), sid.epoch, sid.version)
+}
 
+func (sid *Shortid) generate(tm time.Time, epoch time.Time, version uint) string {
+	ts := uint(tm.Sub(epoch).Seconds())
 	var countrunes []rune
 	sid.mx.Lock()
-	if sec == sid.sec {
+	if ts == sid.ts {
 		sid.count++
 	} else {
 		sid.count = 0
-		sid.sec = sec
+		sid.ts = ts
 	}
 	if sid.count > 0 {
-		countrunes = sid.abc.Encode(sid.count)
+		countrunes = sid.abc.Encode(sid.count, 6)
 	}
 	sid.mx.Unlock()
 
-	res := sid.abc.Encode(version)
-	res = append(res, sid.abc.Encode(sid.worker)...)
+	res := sid.abc.Encode(version, 4)
+	res = append(res, sid.abc.Encode(sid.worker, 5)...)
 	res = append(res, countrunes...)
-	res = append(res, sid.abc.Encode(sec)...)
+	res = append(res, sid.abc.Encode(ts, 4)...)
 	return string(res)
 }
 
@@ -128,24 +130,34 @@ func (abc *Abc) next(lessthen int) int {
 	return int(math.Floor(float64(abc.seed) / (233280.0) * float64(lessthen)))
 }
 
-func (abc *Abc) Encode(val uint) []rune {
-	nlookups := int(math.Log2(float64(val))-5) - 1
-	if nlookups < 1 {
-		nlookups = 1
+func (abc *Abc) Encode(val uint, dig uint) []rune {
+	if dig > 6 {
+		panic("max dig=6")
 	}
-	buf := make([]byte, nlookups)
-	_, err := randc.Read(buf)
-	if err != nil {
-		for i, _ := range buf {
-			buf[i] = byte(randm.Int31n(16))
+	size := 1
+	if val >= 1 {
+		size = int(math.Log2(float64(val)))/int(dig) + 1
+		if size < 1 {
+			size = 1
 		}
 	}
-	res := make([]rune, nlookups)
+
+	mask := int(1<<dig - 1)
+	buf := make([]byte, size)
+	if _, err := randc.Read(buf); err != nil {
+		for i, _ := range buf {
+			buf[i] = byte(randm.Int31n(0xff))
+		}
+	}
+	res := make([]rune, size)
 	abc.Lock()
 	for i, _ := range res {
-		p1 := uint8(val>>uint(4*i)) & 0x0f
-		p2 := uint8(buf[i]) & 0x30
-		res[i] = abc.alphabet[p1|p2]
+		shift := dig * uint(i)
+		index := int(val>>shift) & mask
+		if dig < 6 {
+			index = index | (int(buf[i]) & int(0x3f-mask))
+		}
+		res[i] = abc.alphabet[index]
 	}
 	abc.Unlock()
 	return res
