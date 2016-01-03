@@ -6,8 +6,8 @@ package shortid_test
 
 import (
 	"github.com/ventu-io/go-shortid"
-	"testing"
 	"math"
+	"testing"
 )
 
 func TestShortid_Generate1MilValues_unique(t *testing.T) {
@@ -17,7 +17,7 @@ func TestShortid_Generate1MilValues_unique(t *testing.T) {
 	maxlen := 0.
 	minlen := 1e9
 	for i := 0; i < n; i++ {
-		id := sid.Generate()
+		id, _ := sid.Generate()
 		if _, ok := ids[id]; !ok {
 			ids[id] = struct{}{}
 		}
