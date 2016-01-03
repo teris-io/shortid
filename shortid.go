@@ -1,36 +1,69 @@
-// Copyright 2016 Ventu.io. All rights reserved.
-// Use of this source code is governed by a MIT-style
-// license that can be found in the LICENSE file
+// Copyright © 2016 Ventu.io, Oleg Sklyar, contributors
+// The use of this source code is governed by a MIT style license found in the LICENSE file
 
-// Original idea of the algorithm, although reworked:
-// Copyright (c) 2015 Dylan Greene, contributors
-// https://github.com/dylang/shortid
+// Original algorithm:
+// Copyright © 2015 Dylan Greene, contributors: https://github.com/dylang/shortid.
+// MIT-license as found in the LICENSE file.
 
-// Seed computation based on The Central Randomizer 1.3
-// (C) 1997 by Paul Houle (houle@msc.cornell.edu)
+// Seed computation: based on The Central Randomizer 1.3
+// Copyright © 1997 Paul Houle (houle@msc.cornell.edu)
 
-// Package shortid provides functionality to generate short (normally 9 to 11 symbols), unique (for
-// 34 years from 1/1/2016) and URL friendly (by default) Ids.
+// Package shortid enables generation of short, unique and by default URL friendly Ids. The package
+// is heavily inspired by the node.js https://github.com/dylang/shortid library.
 //
-// Being inspired by the node.js shortid library (https://github.com/dylang/shortid) this package is
-// not a simple Go port, it actually adds a number of improvements to the original: (i) safe to be
-// used in concurrent goroutines, (ii) no yearly epoch resets are required for 34 years, (iii) if Id
-// generation requests are made at different milliseconds since epoch the length is guaranteed to be
-// 9 symbols for 34 years with zero collisions, (iv) within the same millisecond unlimited number of
-// further symbols can be added to guarantee no collisions, (v) 32 instead of 16 workers are
-// supported.
+// Id Length
+//
+// The standard Id length is 9 symbols when generated at a rate of 1 Id per millisecond,
+// occasionally it reaches 11 (at the rate of a few thousand Ids per millisecond) and very-very
+// rarely it can go beyond that during continuous generation at full throttle on high-performant
+// hardware. A test generating 500k Ids at full throttle on conventional hardware generated the
+// following Ids at the head and the tail (length > 9 is expected for this test):
+//
+//  -NDveu-9Q
+//  iNove6iQ9J
+//  NVDve6-9Q
+//  VVDvc6i99J
+//  NVovc6-QQy
+//  VVoveui9QC
+//  ...
+//  tFmGc6iQQs
+//  KpTvcui99k
+//  KFTGcuiQ9p
+//  KFmGeu-Q9O
+//  tFTvcu-QQt
+//  tpTveu-99u
+//
+// Life span
+//
+// The package guarantees the generation of unique Ids with zero collisions for 34 years
+// (1/1/2016-1/1/2050) using the same worker Id within a single (although concurrent) application if
+// application restarts take longer than 1 millisecond. The package supports up to 32 works, all
+// providing unique sequences.
+//
+// Implementation details
+//
+// Although heavily inspired by the node.js shortid library this is
+// not a simple Go port. In addition it
+//
+//  - is safe to concurrency;
+//  - does not require any yearly version/epoch resets;
+//  - provides stable Id size over a long period at the rate of 1ms;
+//  - guarantees no collisions (due to guaranteed fixed size of Ids between milliseconds and because
+//    multiple requests within the same ms lead to longer Ids with the prefix unique to the ms);
+//  - supports 32 over 16 workers.
 //
 // The algorithm uses less randomness than the original node.js implementation, which permits to
-// extend the life span, reduce and guarantee the length. When encoding the worker and the
-// millisecond value 2^5 (32) alphabet characters are used in 2 blocks for each symbol (original:
-// 2^4 in 4 blocks). When encoding the count of requests within the same millisecond no randomness
-// is used at all (i.e. one symbol represents 64 combinations). Therefore, multiple requests within
-// the same millisecond will rarely lead to more than 2 extra symbols (request count must exceed
-// 4096) and the value of 3 is difficult to imagine (260k requests within the same millisecond).
+// extend the life span as well as reduce and guarantee the length. In general terms, each Id
+// has the following 3 pieces of information encoded: the millisecond (first 8 symbols), the worker
+// Id (9th symbol), running concurrent counter within the same millisecond, only if required, over
+// all remaining symbols. The element of randomness per symbol is 1/2 for the worker and the
+// millisecond and 0 for the counter. Here 0 means no randomness, i.e. every value is encoded using
+// a 64-base alphabet; 1/2 means one of two matching symbols of the supplied alphabet, 1/4 one of
+// four matching symbols. The original algorithm of the node.js module uses 1/4 throughout.
 //
-// The implemented type Abc exports the Encode method, which accepts 'digits' for n in 2^n of the
-// alphabet characters to be used to encode data, thus permitting defining other algorithms with
-// more or less randomness.
+// All methods accepting the parameters that govern the randomness are exported and can be used
+// to directly implement an algorithm with e.g. more randomness, but with longer Ids and shorter
+// life spans.
 package shortid
 
 import (
@@ -40,7 +73,9 @@ import (
 	"math"
 	randm "math/rand"
 	"sync"
+	"sync/atomic"
 	"time"
+	"unsafe"
 )
 
 // Abc represents a shuffled alphabet used to generate the Ids and provides methods to
@@ -49,7 +84,7 @@ type Abc struct {
 	alphabet []rune
 }
 
-// Shortid represents a short Id generator working with a given alphabet.
+// Shortid type represents a short Id generator working with a given alphabet.
 type Shortid struct {
 	abc    Abc
 	worker uint
@@ -71,12 +106,14 @@ func init() {
 // GetDefault retrieves the default short Id generator initialised with the default alphabet,
 // worker=0 and seed=1. The default can be overwritten using SetDefault.
 func GetDefault() *Shortid {
-	return shortid
+	return (*Shortid)(atomic.LoadPointer((*unsafe.Pointer)(unsafe.Pointer(&shortid))))
 }
 
 // SetDefault overwrites the default generator.
 func SetDefault(sid *Shortid) {
-	shortid = sid
+	target := (*unsafe.Pointer)(unsafe.Pointer(&shortid))
+	source := unsafe.Pointer(sid)
+	atomic.SwapPointer(target, source)
 }
 
 // Generate generates an Id using the default generator.
@@ -106,7 +143,6 @@ func New(worker uint8, alphabet string, seed uint64) (*Shortid, error) {
 			ms:     0,
 			count:  0,
 		}
-		log.Info("new %v", sid)
 		return sid, nil
 	} else {
 		return nil, err
@@ -124,7 +160,7 @@ func MustNew(worker uint8, alphabet string, seed uint64) *Shortid {
 
 // Generate generates a new short Id.
 func (sid *Shortid) Generate() (string, error) {
-	return sid.generate(time.Now(), sid.epoch)
+	return sid.GenerateInternal(time.Now(), sid.epoch)
 }
 
 // MustGenerate acts just like Generate, but panics instead of returning errors.
@@ -136,8 +172,9 @@ func (sid *Shortid) MustGenerate() string {
 	}
 }
 
-func (sid *Shortid) generate(tm time.Time, epoch time.Time) (string, error) {
-	ms, count := sid.msAndCountLocking(tm, epoch)
+// GenerateInternal should only be used for testing purposes.
+func (sid *Shortid) GenerateInternal(tm time.Time, epoch time.Time) (string, error) {
+	ms, count := sid.getMsAndCounter(tm, epoch)
 	idrunes := make([]rune, 9)
 	if tmp, err := sid.abc.Encode(ms, 8, 5); err == nil {
 		copy(idrunes, tmp) // first 8 symbols
@@ -160,10 +197,10 @@ func (sid *Shortid) generate(tm time.Time, epoch time.Time) (string, error) {
 	return string(idrunes), nil
 }
 
-func (sid *Shortid) msAndCountLocking(tm time.Time, epoch time.Time) (uint, uint) {
+func (sid *Shortid) getMsAndCounter(tm time.Time, epoch time.Time) (uint, uint) {
+	ms := uint(tm.Sub(epoch).Nanoseconds() / 1000000)
 	sid.mx.Lock()
 	defer sid.mx.Unlock()
-	ms := uint(tm.Sub(epoch).Nanoseconds() / 1000000)
 	if ms == sid.ms {
 		sid.count++
 	} else {
@@ -296,7 +333,7 @@ func maskedRandomInts(size, mask int) []int {
 			ints[i] = int(b) & mask
 		}
 	} else {
-		for i, _ := range bytes {
+		for i, _ := range ints {
 			ints[i] = randm.Intn(0xff) & mask
 		}
 	}
