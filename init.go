@@ -4,11 +4,6 @@ import (
 	"github.com/op/go-logging"
 )
 
-var log = logging.MustGetLogger("longpoll")
-
-const (
-	no int32 = iota
-	yes
-)
+var log = logging.MustGetLogger("shortid")
 
 const Version = 1.0
