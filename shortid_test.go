@@ -7,25 +7,30 @@ package shortid_test
 import (
 	"github.com/ventu-io/go-shortid"
 	"testing"
+	"math"
 )
 
 func TestShortid_Generate1MilValues_unique(t *testing.T) {
-	n := int(1e6)
+	n := int(5e5)
 	sid, _ := shortid.New(0, shortid.DEFAULT_ABC, 155000)
 	ids := make(map[string]struct{})
-	var dups []string
+	maxlen := 0.
+	minlen := 1e9
 	for i := 0; i < n; i++ {
 		id := sid.Generate()
 		if _, ok := ids[id]; !ok {
 			ids[id] = struct{}{}
-		} else {
-			dups = append(dups, id)
 		}
-		if i <= 10 || i >= n-10 {
-			t.Log(id)
-		}
+		maxlen = math.Max(maxlen, float64(len(id)))
+		minlen = math.Min(minlen, float64(len(id)))
 	}
 	if len(ids) != n {
-		t.Errorf("expected len 1e6, found %v. duplicates: %v", len(ids), dups)
+		t.Errorf("expected len 1e6, found %v. duplicates: %v", len(ids))
+	}
+	if minlen != 9 {
+		t.Errorf("min length expected to be 9, found %v", minlen)
+	}
+	if maxlen > 11 {
+		t.Errorf("max length expected to be 11, found %v", maxlen)
 	}
 }

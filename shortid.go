@@ -109,7 +109,11 @@ func (abc *Abc) shuffle() {
 	copy(source, abc.original.alphabet)
 	// abc.next(len(source)) // copied from the original code, useless?
 	for len(source) > 1 {
-		i := abc.next(len(source))
+		// Based on The Central Randomizer 1.3
+		// (C) 1997 by Paul Houle (houle@msc.cornell.edu)
+		abc.seed = (abc.seed*9301 + 49297) % 233280
+		i := int(abc.seed * uint64(len(source)) / 233280)
+
 		abc.alphabet = append(abc.alphabet, source[i])
 		source = append(source[:i], source[i+1:]...)
 	}
@@ -123,28 +127,19 @@ func (abc *Abc) Reset() {
 	abc.Unlock()
 }
 
-// Based on The Central Randomizer 1.3 (C) 1997 by Paul Houle (houle@msc.cornell.edu)
-func (abc *Abc) next(lessthen int) int {
-	abc.seed = (abc.seed*9301 + 49297) % 233280
-	return int(math.Floor(float64(abc.seed) / (233280.0) * float64(lessthen)))
-}
-
 func (abc *Abc) Encode(val uint, size uint, dig uint) []rune {
-	if dig > 6 {
-		panic("max dig=6")
+	if dig < 4 || 6 < dig {
+		panic("expected dig range [4,6]")
 	}
 
 	var csize uint = 1
 	if val >= 1 {
 		csize = uint(math.Log2(float64(val))/float64(dig) + 1.0)
-		if csize < 1 {
-			csize = 1
-		}
 	}
 	if size == 0 {
 		size = csize
 	} else if size < csize {
-		panic("cannot accommodate data")
+		panic(fmt.Sprintf("cannot accommodate data, need %v digits, got %v", csize, size))
 	}
 
 	mask := int(1<<dig - 1)

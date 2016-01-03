@@ -12,9 +12,9 @@ import (
 func TestShortid_generatex4(t *testing.T) {
 	sid, _ := New(0, DEFAULT_ABC, 155000)
 	now := time.Now()
-	t.Log(sid.generate(now, now.AddDate(0, 0, -1), 5))
-	t.Log(sid.generate(now.AddDate(1, 0, 1), now, 5))
-	t.Log(sid.generate(now.AddDate(15, 0, 1), now, 5))
-	t.Log(sid.generate(now.AddDate(16, 0, 1), now, 5))
-	t.Log(sid.generate(now.AddDate(34, 0, 1), now, 5))
+	id00 := sid.generate(now.AddDate(0, 0, 1), now, 5)
+	id34 := sid.generate(now.AddDate(34, 0, 1), now, 5)
+	if len(id00) != 9 || len(id34) != 9 {
+		t.Errorf("all ids with different ms are expected to be of length 9")
+	}
 }
