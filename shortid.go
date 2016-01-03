@@ -28,7 +28,7 @@ type (
 		worker  uint
 		version uint      // restarts every year, rotates every 16 years!
 		epoch   time.Time // restarts every year
-		ts      uint      // timestamp (arbitrary units) incrementing since startts
+		ms      uint      // timestamp (arbitrary units) incrementing since startts
 		count   uint      // request count within ts
 	}
 )
@@ -41,9 +41,9 @@ func New(worker uint8, alphabet string, seed uint64) (*Shortid, error) {
 		return &Shortid{
 			abc:     abc,
 			worker:  uint(worker),
-			ts:      0,
+			ms:      0,
 			count:   0,
-			epoch:   time.Date(now.Year()-1, time.December, 1, 1, 1, 1, 1, time.Local),
+			epoch:   time.Date(2000, time.January, 1, 0, 0, 0, 0, time.Local),
 			version: uint(now.Year() % 16),
 		}, nil
 	} else {
@@ -56,24 +56,23 @@ func (sid *Shortid) Generate() string {
 }
 
 func (sid *Shortid) generate(tm time.Time, epoch time.Time, version uint) string {
-	ts := uint(tm.Sub(epoch).Seconds())
+	ms := uint(tm.Sub(epoch).Nanoseconds() / 1000000)
 	var countrunes []rune
 	sid.mx.Lock()
-	if ts == sid.ts {
+	if ms == sid.ms {
 		sid.count++
 	} else {
 		sid.count = 0
-		sid.ts = ts
+		sid.ms = ms
 	}
 	if sid.count > 0 {
-		countrunes = sid.abc.Encode(sid.count, 6)
+		countrunes = sid.abc.Encode(sid.count, 0, 6)
 	}
 	sid.mx.Unlock()
 
-	res := sid.abc.Encode(version, 4)
-	res = append(res, sid.abc.Encode(sid.worker, 5)...)
+	res := sid.abc.Encode(ms, 8, 5)
+	res = append(res, sid.abc.Encode(sid.worker, 1, 5)[0])
 	res = append(res, countrunes...)
-	res = append(res, sid.abc.Encode(ts, 4)...)
 	return string(res)
 }
 
@@ -130,26 +129,32 @@ func (abc *Abc) next(lessthen int) int {
 	return int(math.Floor(float64(abc.seed) / (233280.0) * float64(lessthen)))
 }
 
-func (abc *Abc) Encode(val uint, dig uint) []rune {
+func (abc *Abc) Encode(val uint, size uint, dig uint) []rune {
 	if dig > 6 {
 		panic("max dig=6")
 	}
-	size := 1
+
+	var csize uint = 1
 	if val >= 1 {
-		size = int(math.Log2(float64(val)))/int(dig) + 1
-		if size < 1 {
-			size = 1
+		csize = uint(math.Log2(float64(val))/float64(dig) + 1.0)
+		if csize < 1 {
+			csize = 1
 		}
+	}
+	if size == 0 {
+		size = csize
+	} else if size < csize {
+		panic("cannot accommodate data")
 	}
 
 	mask := int(1<<dig - 1)
-	buf := make([]byte, size)
+	buf := make([]byte, int(size))
 	if _, err := randc.Read(buf); err != nil {
 		for i, _ := range buf {
 			buf[i] = byte(randm.Int31n(0xff))
 		}
 	}
-	res := make([]rune, size)
+	res := make([]rune, int(size))
 	abc.Lock()
 	for i, _ := range res {
 		shift := dig * uint(i)
