@@ -14,7 +14,7 @@ import (
 
 func TestShortid_Generate_oneIdPerYear_over34Years_uniqueOf9Symbols(t *testing.T) {
 	now := time.Now()
-	sid := shortid.MustNew(0, shortid.DEFAULT_ABC, 155000)
+	sid := shortid.MustNew(0, shortid.DefaultABC, 155000)
 	for years := 0; years < 38; years++ {
 		tm := now.AddDate(years, 0, 1)
 		id, err := sid.GenerateInternal(&tm, now)
@@ -32,7 +32,7 @@ func TestShortid_Generate_oneIdPerYear_over34Years_uniqueOf9Symbols(t *testing.T
 func TestShortid_Generate_approx3MilIdsWith5MinStep_over33Years_unique9_11Symbols(t *testing.T) {
 	// t.Skip("do not run for unit testing")
 
-	sid := shortid.MustNew(0, shortid.DEFAULT_ABC, 155000)
+	sid := shortid.MustNew(0, shortid.DefaultABC, 155000)
 	ids := make(map[string]struct{}, 3800000)
 	now := time.Now()
 	tm := now
@@ -66,9 +66,9 @@ func TestShortid_Generate_approx3MilIdsWith5MinStep_over33Years_unique9_11Symbol
 func TestShortid_Generate_500kValuesEach_at6Timepoints_unique9_11Symbols(t *testing.T) {
 	// t.Skip("do not run for unit testing")
 
-	var n int = 500000
-	var m int = 6
-	sid, _ := shortid.New(0, shortid.DEFAULT_ABC, 155000)
+	n := 500000
+	m := 6
+	sid, _ := shortid.New(0, shortid.DefaultABC, 155000)
 	ids := make(map[string]struct{}, n)
 	tms := make([]time.Time, m)
 	maxlen := 0.
@@ -86,7 +86,7 @@ func TestShortid_Generate_500kValuesEach_at6Timepoints_unique9_11Symbols(t *test
 		}
 	}
 	if len(ids) != n*m {
-		t.Errorf("expected len 1e6, found %v. duplicates: %v", len(ids))
+		t.Errorf("expected len 1e6, found %v", len(ids))
 	}
 	if minlen != 9 {
 		t.Errorf("min length expected to be 9, found %v", minlen)
@@ -98,7 +98,7 @@ func TestShortid_Generate_500kValuesEach_at6Timepoints_unique9_11Symbols(t *test
 }
 
 func TestShortid_Generate_500kValues_concurrently(t *testing.T) {
-	sid := shortid.MustNew(0, shortid.DEFAULT_ABC, 155000)
+	sid := shortid.MustNew(0, shortid.DefaultABC, 155000)
 	ids := make(map[string]struct{}, 900000)
 	var mx sync.Mutex
 	generate := func(done chan bool) {

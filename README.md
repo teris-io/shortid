@@ -16,7 +16,7 @@ The easiest way to start generating Ids is:
 
 The recommended one is to initialise and reuse a generator specific to a given worker:
 
-	sid := shortid.New(1, shortid.DEFAULT_ABC, 2342)
+	sid := shortid.New(1, shortid.DefaultAbc, 2342)
 
 	// then either:
 	fmt.Printf(sid.Generate())
