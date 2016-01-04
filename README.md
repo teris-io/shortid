@@ -4,7 +4,7 @@
 # Short-Id Generator for Go
 
 The `go-shortid` library (package `shortid`) enables the generation of short, fully unique,
-non-sequential and by default URL friendly Ids at a rate of hudredths of thousand per second. It
+non-sequential and by default URL friendly Ids at a rate of hundreds of thousand per second. It
 guarantees uniqueness during the time period until 2050!
 
 The package is heavily inspired by the node.js [shortid][nodeshortid] library (see more detail below).
