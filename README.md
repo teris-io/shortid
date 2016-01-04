@@ -102,15 +102,15 @@ implement an algorithm with e.g. more randomness, but with longer Ids and shorte
 
 ## License
 
-Copyright © 2016 Ventu.io, Oleg Sklyar, contributors.
+Copyright (c) 2016 Ventu.io, Oleg Sklyar, contributors.
 
 Distributed under a MIT style license found in the [LICENSE][license] file.
 
-**[Original algorithm][nodeshortid]:** Copyright © 2015 Dylan Greene, contributors. The same MIT
+**[Original algorithm][nodeshortid]:** Copyright (c) 2015 Dylan Greene, contributors. The same MIT
 license applies. Many thanks to Dylan for putting together the original node.js library, which
 inspired this "port":
 
-**Seed computation:** based on The Central Randomizer 1.3. Copyright © 1997 Paul Houle (houle@msc.cornell.edu)
+**Seed computation:** based on The Central Randomizer 1.3. Copyright (c) 1997 Paul Houle (houle@msc.cornell.edu)
 
 
 [go]: https://golang.org

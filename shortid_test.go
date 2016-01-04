@@ -1,4 +1,4 @@
-// Copyright © 2016 Ventu.io, Oleg Sklyar, contributors
+// Copyright (c) 2016 Ventu.io, Oleg Sklyar, contributors
 // The use of this source code is governed by a MIT style license found in the LICENSE file
 
 package shortid_test
@@ -135,9 +135,6 @@ func TestShortid_onMustGenerate_success(t *testing.T) {
 	sid := shortid.MustNew(1, shortid.DEFAULT_ABC, 1)
 	if id := sid.MustGenerate(); len(id) != 9 {
 		t.Errorf("expected id of length 9, found %v", id)
-	}
-	if id := sid.MustGenerate(); len(id) != 10 {
-		t.Errorf("expected id of length 10, found %v", id)
 	}
 	time.Sleep(2 * time.Millisecond)
 	if id := sid.MustGenerate(); len(id) != 9 {

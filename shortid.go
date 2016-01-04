@@ -1,12 +1,12 @@
-// Copyright © 2016 Ventu.io, Oleg Sklyar, contributors
+// Copyright (c) 2016 Ventu.io, Oleg Sklyar, contributors
 // The use of this source code is governed by a MIT style license found in the LICENSE file
 
 // Original algorithm:
-// Copyright © 2015 Dylan Greene, contributors: https://github.com/dylang/shortid.
+// Copyright (c) 2015 Dylan Greene, contributors: https://github.com/dylang/shortid.
 // MIT-license as found in the LICENSE file.
 
 // Seed computation: based on The Central Randomizer 1.3
-// Copyright © 1997 Paul Houle (houle@msc.cornell.edu)
+// Copyright (c) 1997 Paul Houle (houle@msc.cornell.edu)
 
 // Package shortid enables the generation of short, unique, non-sequential and by default URL friendly
 // Ids. The package is heavily inspired by the node.js https://github.com/dylang/shortid library.
