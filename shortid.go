@@ -78,6 +78,11 @@ import (
 	"unsafe"
 )
 
+const Version = 1.0
+
+// DEFAULT_ABC is the default URL-friendly alphabet.
+const DEFAULT_ABC = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-"
+
 // Abc represents a shuffled alphabet used to generate the Ids and provides methods to
 // encode data.
 type Abc struct {
@@ -94,9 +99,6 @@ type Shortid struct {
 	mx     sync.Mutex // locks access to ms and count
 }
 
-// DEFAULT_ABC is the default URL-friendly alphabet.
-const DEFAULT_ABC = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-"
-
 var shortid *Shortid
 
 func init() {
@@ -105,8 +107,8 @@ func init() {
 
 // GetDefault retrieves the default short Id generator initialised with the default alphabet,
 // worker=0 and seed=1. The default can be overwritten using SetDefault.
-func GetDefault() *Shortid {
-	return (*Shortid)(atomic.LoadPointer((*unsafe.Pointer)(unsafe.Pointer(&shortid))))
+func GetDefault() Shortid {
+	return *(*Shortid)(atomic.LoadPointer((*unsafe.Pointer)(unsafe.Pointer(&shortid))))
 }
 
 // SetDefault overwrites the default generator.
@@ -135,11 +137,14 @@ func MustGenerate() string {
 // different for multiple or distributed processes generating Ids into the same data space. The
 // seed, on contrary, should be identical.
 func New(worker uint8, alphabet string, seed uint64) (*Shortid, error) {
+	if worker > 31 {
+		return nil, errors.New("expected worker in the range [0,31]")
+	}
 	if abc, err := NewAbc(alphabet, seed); err == nil {
 		sid := &Shortid{
 			abc:    abc,
 			worker: uint(worker),
-			epoch:  time.Date(2016, time.January, 1, 0, 0, 0, 0, time.Local),
+			epoch:  time.Date(2016, time.January, 1, 0, 0, 0, 0, time.UTC),
 			ms:     0,
 			count:  0,
 		}
@@ -160,7 +165,7 @@ func MustNew(worker uint8, alphabet string, seed uint64) *Shortid {
 
 // Generate generates a new short Id.
 func (sid *Shortid) Generate() (string, error) {
-	return sid.GenerateInternal(time.Now(), sid.epoch)
+	return sid.GenerateInternal(nil, sid.epoch)
 }
 
 // MustGenerate acts just like Generate, but panics instead of returning errors.
@@ -173,7 +178,7 @@ func (sid *Shortid) MustGenerate() string {
 }
 
 // GenerateInternal should only be used for testing purposes.
-func (sid *Shortid) GenerateInternal(tm time.Time, epoch time.Time) (string, error) {
+func (sid *Shortid) GenerateInternal(tm *time.Time, epoch time.Time) (string, error) {
 	ms, count := sid.getMsAndCounter(tm, epoch)
 	idrunes := make([]rune, 9)
 	if tmp, err := sid.abc.Encode(ms, 8, 5); err == nil {
@@ -197,10 +202,15 @@ func (sid *Shortid) GenerateInternal(tm time.Time, epoch time.Time) (string, err
 	return string(idrunes), nil
 }
 
-func (sid *Shortid) getMsAndCounter(tm time.Time, epoch time.Time) (uint, uint) {
-	ms := uint(tm.Sub(epoch).Nanoseconds() / 1000000)
+func (sid *Shortid) getMsAndCounter(tm *time.Time, epoch time.Time) (uint, uint) {
 	sid.mx.Lock()
 	defer sid.mx.Unlock()
+	var ms uint
+	if tm != nil {
+		ms = uint(tm.Sub(epoch).Nanoseconds() / 1000000)
+	} else {
+		ms = uint(time.Now().Sub(epoch).Nanoseconds() / 1000000)
+	}
 	if ms == sid.ms {
 		sid.count++
 	} else {
