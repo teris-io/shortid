@@ -1,5 +1,5 @@
 
-[![Build status][buildimage]][travis] [![Coverage][codecovimage]][codecov] [![API documentation][godocimage]][docs]
+[![Build status][buildimage]][travis] [![Coverage][codecovimage]][codecov] [![GoReportCard][goreportcardimage]][goreportcard] [![API documentation][godocimage]][docs]
 
 # Short-Id Generator for Go
 
@@ -131,3 +131,6 @@ inspired this "port":
 [license]: https://github.com/ventu-io/go-shortid/blob/master/LICENSE
 
 [nodeshortid]: https://github.com/dylang/shortid
+
+[goreportcard]: http://goreportcard.com/report/ventu-io/go-shortid
+[goreportcardimage]: https://img.shields.io/badge/goreportcard-A%2B-brightgreen.svg
