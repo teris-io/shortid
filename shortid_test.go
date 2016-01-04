@@ -123,11 +123,6 @@ func TestShortid_onGenerate_success(t *testing.T) {
 	} else if len(id) != 9 {
 		t.Errorf("expected id of length 9, found %v", id)
 	}
-	if id, err := sid.Generate(); err != nil {
-		t.Error(err)
-	} else if len(id) != 10 {
-		t.Errorf("expected id of length 10, found %v", id)
-	}
 	time.Sleep(2 * time.Millisecond)
 	if id, err := sid.Generate(); err != nil {
 		t.Error(err)

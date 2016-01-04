@@ -8,8 +8,8 @@
 // Seed computation: based on The Central Randomizer 1.3
 // Copyright © 1997 Paul Houle (houle@msc.cornell.edu)
 
-// Package shortid enables generation of short, unique and by default URL friendly Ids. The package
-// is heavily inspired by the node.js https://github.com/dylang/shortid library.
+// Package shortid enables the generation of short, unique, non-sequential and by default URL friendly
+// Ids. The package is heavily inspired by the node.js https://github.com/dylang/shortid library.
 //
 // Id Length
 //

@@ -7,9 +7,9 @@ import (
 	"github.com/ventu-io/go-shortid"
 	"math"
 	"math/rand"
+	"sync"
 	"testing"
 	"time"
-	"sync"
 )
 
 func TestShortid_Generate_oneIdPerYear_over34Years_uniqueOf9Symbols(t *testing.T) {
