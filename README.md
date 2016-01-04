@@ -107,8 +107,8 @@ Copyright © 2016 Ventu.io, Oleg Sklyar, contributors.
 Distributed under a MIT style license found in the [LICENSE][license] file.
 
 **[Original algorithm][nodeshortid]:** Copyright © 2015 Dylan Greene, contributors. The same MIT
-*license applies. Many thanks to Dylan for putting together the original node.js library, which
-*inspired this "port":
+license applies. Many thanks to Dylan for putting together the original node.js library, which
+inspired this "port":
 
 **Seed computation:** based on The Central Randomizer 1.3. Copyright © 1997 Paul Houle (houle@msc.cornell.edu)
 
