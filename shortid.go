@@ -78,7 +78,7 @@ import (
 	"unsafe"
 )
 
-const Version = 1.0
+const Version = 1.1
 
 // DEFAULT_ABC is the default URL-friendly alphabet.
 const DEFAULT_ABC = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-"

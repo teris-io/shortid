@@ -100,6 +100,12 @@ implement an algorithm with e.g. more randomness, but with longer Ids and shorte
 
 ## Changelog
 
+#### 4 Jan 2016: Version 1.0
+
+* [First release](https://github.com/ventu-io/go-shortid/releases/tag/v1.0) of `shortid`. The first
+release of the go-shortid library brings short (normally 9 symbols), unique, non sequential and
+URL friendly Ids that can be generated without any collisions until 2050.
+
 ## License
 
 Copyright (c) 2016 Ventu.io, Oleg Sklyar, contributors.
