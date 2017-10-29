@@ -1,5 +1,5 @@
-// Copyright (c) 2016 Ventu.io, Oleg Sklyar, contributors
-// The use of this source code is governed by a MIT style license found in the LICENSE file
+// Copyright (c) 2016-2017. Oleg Sklyar & teris.io. All rights reserved.
+// See the LICENSE file in the project root for licensing information.
 
 // Original algorithm:
 // Copyright (c) 2015 Dylan Greene, contributors: https://github.com/dylang/shortid.

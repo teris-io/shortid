@@ -1,9 +1,8 @@
+[![Build status][buildimage]][build] [![Coverage][codecovimage]][codecov] [![GoReportCard][cardimage]][card] [![API documentation][docsimage]][docs]
 
-[![Build status][buildimage]][travis] [![Coverage][codecovimage]][codecov] [![GoReportCard][goreportcardimage]][goreportcard] [![API documentation][godocimage]][docs]
+# Generator of unique non-sequential short Ids
 
-# Short-Id Generator for Go
-
-The `go-shortid` library (package `shortid`) enables the generation of short, fully unique,
+The package `shortid`enables the generation of short, fully unique,
 non-sequential and by default URL friendly Ids at a rate of hundreds of thousand per second. It
 guarantees uniqueness during the time period until 2050!
 
@@ -29,20 +28,6 @@ The recommended one is to initialise and reuse a generator specific to a given w
 	fmt.Printf(shortid.Generate())
 
 
-The library can be installed by one of the following methods:
-
-* using `go get`
-
-	```
-	go get github.com/ventu-io/go-shortid
-	```
-
-* via cloning this repository:
-
-	```
-	git clone git@github.com:ventu-io/go-shortid.git ${GOPATH}/src/github.com/ventu-io/go-shortid
-	```
-
 ### Id Length
 
 The standard Id length is 9 symbols when generated at a rate of 1 Id per millisecond,
@@ -51,19 +36,19 @@ rarely it can go beyond that during continuous generation at full throttle on hi
 hardware. A test generating 500k Ids at full throttle on conventional hardware generated the
 following Ids at the head and the tail (length > 9 is expected for this test):
 
-    -NDveu-9Q
- 	iNove6iQ9J
- 	NVDve6-9Q
- 	VVDvc6i99J
- 	NVovc6-QQy
- 	VVoveui9QC
- 	...
- 	tFmGc6iQQs
- 	KpTvcui99k
- 	KFTGcuiQ9p
- 	KFmGeu-Q9O
- 	tFTvcu-QQt
- 	tpTveu-99u
+	-NDveu-9Q
+	iNove6iQ9J
+	NVDve6-9Q
+	VVDvc6i99J
+	NVovc6-QQy
+	VVoveui9QC
+	...
+	tFmGc6iQQs
+	KpTvcui99k
+	KFTGcuiQ9p
+	KFmGeu-Q9O
+	tFTvcu-QQt
+	tpTveu-99u
 
 ### Life span
 
@@ -98,19 +83,9 @@ matching symbols of the supplied alphabet is used randomly, 1/4 one of four matc
 methods accepting the parameters that govern the randomness are exported and can be used to directly
 implement an algorithm with e.g. more randomness, but with longer Ids and shorter life spans.
 
-## Changelog
+### License and copyright
 
-#### 4 Jan 2016: Version 1.0
-
-* [First release](https://github.com/ventu-io/go-shortid/releases/tag/v1.0) of `shortid`. The first
-release of the go-shortid library brings short (normally 9 symbols), unique, non sequential and
-URL friendly Ids that can be generated without any collisions until 2050.
-
-## License
-
-Copyright (c) 2016 Ventu.io, Oleg Sklyar, contributors.
-
-Distributed under a MIT style license found in the [LICENSE][license] file.
+	Copyright (c) 2016. Oleg Sklyar and teris.io. MIT license applies. All rights reserved.
 
 **[Original algorithm][nodeshortid]:** Copyright (c) 2015 Dylan Greene, contributors. The same MIT
 license applies. Many thanks to Dylan for putting together the original node.js library, which
@@ -118,19 +93,17 @@ inspired this "port":
 
 **Seed computation:** based on The Central Randomizer 1.3. Copyright (c) 1997 Paul Houle (houle@msc.cornell.edu)
 
-
 [go]: https://golang.org
-[docs]: https://godoc.org/github.com/ventu-io/go-shortid
-[godocimage]: http://img.shields.io/badge/godoc-reference-blue.svg?style=flat
-[travis]: https://travis-ci.org/ventu-io/go-shortid
-[buildimage]: https://travis-ci.org/ventu-io/go-shortid.svg?branch=master
-[codecov]: https://codecov.io/github/ventu-io/go-shortid?branch=master
-[codecovimage]: https://codecov.io/github/ventu-io/go-shortid/coverage.svg?branch=master
-
-
-[license]: https://github.com/ventu-io/go-shortid/blob/master/LICENSE
-
 [nodeshortid]: https://github.com/dylang/shortid
 
-[goreportcard]: http://goreportcard.com/report/ventu-io/go-shortid
-[goreportcardimage]: https://img.shields.io/badge/goreportcard-A%2B-brightgreen.svg
+[build]: https://travis-ci.org/teris-io/shortid
+[buildimage]: https://travis-ci.org/teris-io/shortid.svg?branch=master
+
+[codecov]: https://codecov.io/github/teris-io/shortid?branch=master
+[codecovimage]: https://codecov.io/github/teris-io/shortid/coverage.svg?branch=master
+
+[card]: http://goreportcard.com/report/teris-io/shortid
+[cardimage]: https://goreportcard.com/badge/github.com/teris-io/shortid
+
+[docs]: https://godoc.org/github.com/teris-io/shortid
+[docsimage]: http://img.shields.io/badge/godoc-reference-blue.svg?style=flat
