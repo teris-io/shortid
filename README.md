@@ -1,4 +1,4 @@
-[![Build status][buildimage]][build] [![Coverage][codecovimage]][codecov] [![GoReportCard][cardimage]][card] [![API documentation][docsimage]][docs]
+[![GoReportCard][cardimage]][card] [![API documentation][docsimage]][docs]
 
 # Generator of unique non-sequential short Ids
 
@@ -83,9 +83,9 @@ matching symbols of the supplied alphabet is used randomly, 1/4 one of four matc
 methods accepting the parameters that govern the randomness are exported and can be used to directly
 implement an algorithm with e.g. more randomness, but with longer Ids and shorter life spans.
 
-### License and copyright
+### Original License and copyright
 
-	Copyright (c) 2016. Oleg Sklyar and teris.io. MIT license applies. All rights reserved.
+Copyright (c) 2016. Oleg Sklyar and teris.io. MIT license applies. All rights reserved.
 
 **[Original algorithm][nodeshortid]:** Copyright (c) 2015 Dylan Greene, contributors. The same MIT
 license applies. Many thanks to Dylan for putting together the original node.js library, which
@@ -96,14 +96,8 @@ inspired this "port":
 [go]: https://golang.org
 [nodeshortid]: https://github.com/dylang/shortid
 
-[build]: https://travis-ci.org/teris-io/shortid
-[buildimage]: https://travis-ci.org/teris-io/shortid.svg?branch=master
-
-[codecov]: https://codecov.io/github/teris-io/shortid?branch=master
-[codecovimage]: https://codecov.io/github/teris-io/shortid/coverage.svg?branch=master
-
-[card]: http://goreportcard.com/report/teris-io/shortid
-[cardimage]: https://goreportcard.com/badge/github.com/teris-io/shortid
+[card]: http://goreportcard.com/report/duncancrawford/shortid
+[cardimage]: https://goreportcard.com/badge/github.com/duncancrawford/shortid
 
 [docs]: https://godoc.org/github.com/teris-io/shortid
 [docsimage]: http://img.shields.io/badge/godoc-reference-blue.svg?style=flat
