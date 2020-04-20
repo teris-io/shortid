@@ -37,7 +37,6 @@ jobs:
       - name: Check suspicious constructs (staticcheck)
         run: |
           go get honnef.co/go/tools/cmd/staticcheck
-          go mod vendor
           staticcheck ./...
 
   security:
