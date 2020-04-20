@@ -4,7 +4,6 @@
 package shortid_test
 
 import (
-	"github.com/teris-io/shortid"
 	"testing"
 	"time"
 )
