@@ -112,9 +112,8 @@ func GetDefault() *Shortid {
 // SetDefault overwrites the default generator.
 func SetDefault(sid *Shortid) {
 	target := (*unsafe.Pointer)(unsafe.Pointer(&shortid))
-	fmt.Printf("shortid=%p, *target=%d.", shortid, *target)
+	fmt.Printf("shortid=%p, *target=%x.", shortid, *target)
 	source := unsafe.Pointer(sid)
-	fmt.Printf("source=%p, *source=%d.", source, *source)
 	atomic.SwapPointer(target, source)
 }
 
