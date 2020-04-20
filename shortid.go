@@ -114,8 +114,7 @@ func SetDefault(sid *Shortid) {
 	target := (*unsafe.Pointer)(unsafe.Pointer(&shortid))
 	fmt.Printf("shortid=%p, target=%x.", shortid, target)
 	source := unsafe.Pointer(sid)
-	fmt.Printf("source=%p", source)
-	fmt.Printf("sid=%p, *target=%x.", sid, source)
+	fmt.Printf("sid=%p, source=%x.", sid, source)
 	atomic.SwapPointer(target, source)
 }
 
