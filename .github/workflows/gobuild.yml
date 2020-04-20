@@ -57,7 +57,7 @@ jobs:
         run: |
           export PATH=$PATH:$(go env GOPATH)/bin
           curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s -- -b GOPATH/bin v2.2.0
-          GOPATH/bin/gosec ./...
+          GOPATH/bin/gosec -exclude=G103 ./...
 
   vulnerabilities:
     name: Dependency vulnerability check
