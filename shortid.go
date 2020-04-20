@@ -78,9 +78,6 @@ import (
 	"unsafe"
 )
 
-// Version defined the library version.
-const Version = 1.1
-
 // DefaultABC is the default URL-friendly alphabet.
 const DefaultABC = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-"
 
@@ -210,7 +207,7 @@ func (sid *Shortid) getMsAndCounter(tm *time.Time, epoch time.Time) (uint, uint)
 	if tm != nil {
 		ms = uint(tm.Sub(epoch).Nanoseconds() / 1000000)
 	} else {
-		ms = uint(time.Now().Sub(epoch).Nanoseconds() / 1000000)
+		ms = uint(time.Since(epoch).Nanoseconds() / 1000000)
 	}
 	if ms == sid.ms {
 		sid.count++
