@@ -1,3 +1,13 @@
-.idea/
-vendor/
-Gopkg.lock
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+.glide/
+.idea
+.DS_Store
+main
+main.zip
+output.log
+results.json
