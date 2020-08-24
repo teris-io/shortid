@@ -342,6 +342,7 @@ func maskedRandomInts(size, mask int) []int {
 		}
 	} else {
 		for i := range ints {
+			/* #nosec */ //CWE-338
 			ints[i] = randm.Intn(0xff) & mask
 		}
 	}
